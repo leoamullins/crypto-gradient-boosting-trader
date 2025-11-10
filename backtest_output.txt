@@ -1,0 +1,61 @@
+======================================================================
+IMPROVED BACKTEST WITH PORTFOLIO RISK MANAGEMENT
+======================================================================
+
+[1/5] Loading data...
+  Loaded 194,884 bars of BTCUSDT 5-minute data
+  Date range: 2024-01-01 00:00:00+00:00 to 2025-11-07 16:15:00+00:00
+
+[2/5] Building features...
+  Total samples: 194,824
+  Features: 35
+
+  Data Quality Checks:
+    NaN features: 0
+    Inf features: 0
+    Label mean: -0.000447
+    Label std: 0.005194
+
+[3/5] Training regression model with purged CV...
+  - 20-fold walk-forward cross-validation
+  - 20% hold-out test set
+  - Embargo: 24 bars
+  - Purge buffer: 1.0% around test folds
+
+ Cross-Validation Fold Summary
+ fold  n_train  n_test      mse        r2  pred_mean  pred_std
+    0    60785   15586 0.000041 -0.057070  -0.000285  0.001722
+    1    64476   15586 0.000022 -0.039748  -0.000177  0.001081
+    2    68168   15586 0.000020 -0.023901  -0.000321  0.000865
+    3    71859   15586 0.000018 -0.037263  -0.000567  0.000857
+    4    75551   15586 0.000028 -0.142065  -0.000880  0.001634
+    5    79242   15586 0.000031 -0.166256  -0.001103  0.001773
+    6    82933   15586 0.000036 -0.178552  -0.001364  0.001938
+    7    86625   15586 0.000042 -0.206395  -0.001649  0.002168
+    8    90316   15586 0.000030 -0.042141  -0.000668  0.001265
+    9    94008   15586 0.000036 -0.112412  -0.000431  0.002065
+   10    97699   15586 0.000035 -0.114039  -0.000356  0.002061
+   11   101390   15586 0.000032 -0.073524  -0.000678  0.001716
+   12   105082   15586 0.000035 -0.090397  -0.000788  0.001891
+   13   108773   15586 0.000049 -0.087101  -0.000626  0.002113
+   14   112465   15586 0.000040 -0.041765  -0.000063  0.001384
+   15   116156   15586 0.000041 -0.079950   0.000322  0.001473
+   16   119847   15586 0.000047 -0.131445   0.001174  0.001501
+   17   123539   15586 0.000027 -0.039202  -0.000221  0.001062
+   18   127230   15586 0.000022 -0.034738  -0.000392  0.000813
+   19   130922   15586 0.000022 -0.071170  -0.000710  0.001176
+
+  Average R²: -0.0885 ± 0.0535
+
+Hold-Out Test Set Performance
+  MSE: 0.00001540
+  R²: -0.0865
+  Pred mean: -0.001334
+  Pred std: 0.000909
+Traceback (most recent call last):
+  File "e:\GitRepos\crypto-gradient-boosting-trader\scripts\backtest_final.py", line 101, in <module>
+    print(f"\n  \u2713 Predictions: {len(predictions):,}")
+  File "C:\Users\leomu\miniconda3\envs\ds_env\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 4: character maps to <undefined>

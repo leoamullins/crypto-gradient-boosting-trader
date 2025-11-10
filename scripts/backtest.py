@@ -1,13 +1,4 @@
-"""
-FINAL OPTIMIZED BACKTEST - REGRESSION MODE
-===========================================
-Uses all high-priority improvements:
-1. Regression target (predicts net returns, not binary)
-2. 20-fold walk-forward CV with 20% hold-out test set
-3. Model-based exits (NO fixed stop-loss/take-profit)
-4. Position sizing based on predicted returns
-5. Ensemble scoring (model + regime + breakout)
-"""
+"""Regression backtest with ensemble scoring."""
 
 import pandas as pd
 from trader.data.storage import load_parquet
@@ -17,47 +8,45 @@ from trader.models.gbdt import walkforward_predict
 from trader.strategy.rules import build_signals_regression
 from trader.backtester.simulate import run_backtest
 
-# ===== CONFIGURATION =====
 SYMBOL_FILE = "raw/BTCUSDT_5m.parquet"
 BTC_REGIME_FILE = "raw/BTCUSDT_15m_regime.parquet"
 BREAKOUT_N = 20
-H = 12  # 1 hour holding period
-COST = 0.0005  # 5 bps - realistic exchange fees
-
-# Model-based exits only (NO fixed stops)
+H = 12
+COST = 0.0005
 USE_STOPS = False
 USE_POSITION_SIZING = True
 MAX_POSITION = 1.0
 
 print("=" * 70)
-print("FINAL OPTIMIZED BACKTEST")
+print("BACKTEST")
 print("=" * 70)
 
-# ===== LOAD DATA =====
 print("\n[1/5] Loading data...")
 df = load_parquet(SYMBOL_FILE)
 regime = load_parquet(BTC_REGIME_FILE)["regime"]
-print(f"  Loaded {len(df):,} bars of BTCUSDT 5-minute data")
+print(f"  {len(df):,} bars")
 
-# ===== FEATURE ENGINEERING =====
 print("\n[2/5] Building features...")
 feat = make_features_5m_15m(df, regime)
 feat = feat.join(df[["close"]]).dropna()
 feat = add_cost_aware_label(feat, H=H, roundtrip_cost_logret=COST, mode="regression").dropna()
-print(f"  Total samples: {len(feat):,}")
-print(f"  Features: {len([c for c in feat.columns if c not in ['y', 'fwd_ret', 'close']])}")
+n_features = len([c for c in feat.columns if c not in ['y', 'fwd_ret', 'close']])
+print(f"  {len(feat):,} samples, {n_features} features")
 
-# ===== MODEL TRAINING =====
-print("\n[3/5] Training regression model...")
-print("  - 20-fold walk-forward cross-validation")
-print("  - 20% hold-out test set")
-print("  - Embargo: 2x holding period")
+print("\n[3/5] Training model...")
+print("  - Using anchored walk-forward (retrain weekly)")
+print("  - Embargo: {} bars".format(H * 2))
 
 X = feat.drop(columns=["y", "fwd_ret"])
 y = feat["y"]
 
 predictions = walkforward_predict(
-    X, y, embargo=H * 2, n_splits=20, mode="regression", test_size=0.2
+    X, y,
+    embargo=H * 2,
+    n_splits=20,
+    mode="regression",
+    test_size=0.2,
+    retrain_freq=288 * 7  # Retrain weekly
 ).dropna()
 
 print(f"  ✓ Predictions: {len(predictions):,}")
